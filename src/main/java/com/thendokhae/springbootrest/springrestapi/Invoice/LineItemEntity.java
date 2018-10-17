@@ -1,11 +1,13 @@
 package com.thendokhae.springbootrest.springrestapi.Invoice;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
+@Table(name = "LineItem")
 public class LineItemEntity {
 
     @Id
@@ -16,11 +18,16 @@ public class LineItemEntity {
 
     private BigDecimal unitPrice;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    private InvoiceEntity invoice;
+
     public LineItemEntity() {
     }
 
     public BigDecimal getLineItemTotal(){
-        return BigDecimal.ZERO;
+        BigDecimal lineTotal =  unitPrice.multiply(BigDecimal.valueOf(quantity));
+        return lineTotal.setScale(2, RoundingMode.HALF_UP);
     }
 
     public Long getId() {
@@ -45,5 +52,13 @@ public class LineItemEntity {
 
     public void setUnitPrice(BigDecimal unitPrice) {
         this.unitPrice = unitPrice;
+    }
+
+    public InvoiceEntity getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(InvoiceEntity invoice) {
+        this.invoice = invoice;
     }
 }

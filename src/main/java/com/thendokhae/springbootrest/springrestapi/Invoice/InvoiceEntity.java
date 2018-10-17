@@ -1,14 +1,13 @@
 package com.thendokhae.springbootrest.springrestapi.Invoice;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 
 @Entity
+@Table(name = "Invoice")
 public class InvoiceEntity {
 
     @Id
@@ -21,22 +20,29 @@ public class InvoiceEntity {
 
     private Date invoiceDate;
 
-    @OneToMany(mappedBy = "invoiceEntity")
+    @OneToMany(mappedBy = "invoice")
     private List<LineItemEntity> lineItemList;
 
     public InvoiceEntity() {
     }
 
     public BigDecimal getSubTotal(){
-        return  BigDecimal.ZERO;
+        BigDecimal subTotal = BigDecimal.ZERO;
+        for (LineItemEntity itemEntity: lineItemList) {
+            subTotal = subTotal.add(itemEntity.getLineItemTotal());
+        }
+        return  subTotal.setScale(2, RoundingMode.HALF_UP);
     }
 
     public  BigDecimal getVat(){
-        return BigDecimal.ZERO;
+        BigDecimal vatPercentage = BigDecimal.valueOf(vatRate).divide(BigDecimal.valueOf(100));
+        BigDecimal subTotalVat = getSubTotal().multiply(vatPercentage);
+
+        return subTotalVat.setScale(2,RoundingMode.HALF_UP);
     }
 
     public BigDecimal getTotal(){
-        return BigDecimal.ZERO;
+        return getSubTotal().add(getVat()).setScale(2, RoundingMode.HALF_UP);
     }
 
     public Long getId() {
@@ -69,5 +75,13 @@ public class InvoiceEntity {
 
     public void setInvoiceDate(Date invoiceDate) {
         this.invoiceDate = invoiceDate;
+    }
+
+    public List<LineItemEntity> getLineItemList() {
+        return lineItemList;
+    }
+
+    public void setLineItemList(List<LineItemEntity> lineItemList) {
+        this.lineItemList = lineItemList;
     }
 }

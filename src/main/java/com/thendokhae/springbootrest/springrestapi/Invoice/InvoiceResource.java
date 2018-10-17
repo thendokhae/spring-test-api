@@ -1,11 +1,9 @@
 package com.thendokhae.springbootrest.springrestapi.Invoice;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +12,9 @@ public class InvoiceResource {
 
     @Autowired
     private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private LineItemRepository lineItemRepository;
 
     @GetMapping("/invoices")
     public List<InvoiceEntity> viewAllInvoices(){
@@ -32,7 +33,12 @@ public class InvoiceResource {
     @PostMapping("/invoices")
     public InvoiceEntity addInvoice(@Valid @RequestBody InvoiceEntity invoiceEntity){
         InvoiceEntity invoice =  invoiceRepository.save(invoiceEntity);
-
+        if(invoiceEntity.getLineItemList() != null && !invoiceEntity.getLineItemList().isEmpty()){
+            for (LineItemEntity itemEntity: invoiceEntity.getLineItemList()) {
+                itemEntity.setInvoice(invoice);
+                lineItemRepository.save(itemEntity);
+            }
+        }
         return invoice;
     }
 }
