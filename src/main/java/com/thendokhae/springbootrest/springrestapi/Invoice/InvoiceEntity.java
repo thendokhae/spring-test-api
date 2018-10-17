@@ -3,8 +3,10 @@ package com.thendokhae.springbootrest.springrestapi.Invoice;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class InvoiceEntity {
@@ -18,6 +20,12 @@ public class InvoiceEntity {
     private Long vatRate;
 
     private Date invoiceDate;
+
+    @OneToMany(mappedBy = "invoiceEntity")
+    private List<LineItemEntity> lineItemList;
+
+    public InvoiceEntity() {
+    }
 
     public BigDecimal getSubTotal(){
         return  BigDecimal.ZERO;
